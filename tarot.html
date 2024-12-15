@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarot Card Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&family=Rubik+Scribble&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+
+body {
+  background-image: url('CardTable.png'), url(/floor.png); /* Mengatur dua gambar sebagai latar belakang */
+  background-color: #0b0e16; /* Warna latar belakang akan tertimpa oleh gambar */
+  background-size: contain,cover; /* Menyesuaikan ukuran gambar latar belakang */
+  background-repeat: no-repeat, no-repeat; /* Mencegah gambar latar belakang diulang */
+  background-position: 90% 56% ; /* Posisi tengah untuk kedua gambar */
+  margin-left: 0%;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+
+  #background-video {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -10000000000000; /* Menempatkan video di belakang konten */
+    background-size:cover;
+    transition: 1s opacity;
+  }
+
+
+    .maincontainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .thecard {
+      position: relative;
+      width: 150px;
+      height: 220px;
+      margin: 10px;
+      perspective: 1000px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .thecard .card {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      transform: rotateY(180deg);
+    }
+
+    .thecard .card.flipped {
+      transform: rotateY(0deg);
+    }
+
+    .thecard:hover {
+      transform: translateY(-5px);
+      filter: brightness(1.1);
+    }
+
+    .thecard.flipped:active {
+      transform: scale(1.8);
+      z-index: 999;
+      filter: brightness(1.2);
+    }
+
+    .thecard .face {
+      position: absolute;
+      width: 95%;
+      height: 95%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+    }
+
+    .thecard .front {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .thecard .back {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform: rotateY(180deg);
+    }
+
+    .thecard img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* CSS untuk tombol */
+    .button-custom {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .button {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      border: none;
+      color: white;
+      padding: 15px 40px;
+      font-size: 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+    title {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    .thecard.blurred {
+      filter: blur(3px);
+    }
+
+    .thecard.popup {
+      transform: scale(1.5); /* Perbesaran kartu saat di-klik */
+      z-index: 999; /* Mengatur posisi kartu ke depan */
+    }
+    .opened-cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 40px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .opened-card {
+      width: 220px;
+      height: 380px;
+      transition: transform 0.3s ease;
+    }
+
+    .opened-card:hover {
+      transform: scale(1.1);
+    }
+
+    /* Tambahkan efek glow untuk kartu yang terbuka */
+    .opened-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    /* Section untuk menampilkan informasi tambahan mengenai kartu yang dibalik */
+    #cardInfo {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #cardInfo h3 {
+      color: #ffd700;
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #cardInfo p {
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .shuffle-animation {
+  animation: shuffle-card 0.5s ease-in-out;
+}
+
+@keyframes shuffle-card {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+/* Tambahkan container untuk area permainan */
+.game-area {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  padding: 30px;
+  margin: 20px auto;
+  max-width: 1400px;
+}
+
+@keyframes shuffle-animation {
+  0% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-5deg) translateY(-5px); }
+  75% { transform: rotate(5deg) translateY(5px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+.shuffling {
+  animation: shuffle-animation 0.5s ease infinite;
+}
+
+/* Media Queries untuk Responsivitas */
+@media screen and (max-width: 1200px) {
+  .dropdown {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+  }
+  
+  .dropbtn {
+    width: 200px; /* Sesuaikan ukuran gambar navbar */
+    height: auto;
+  }
+  
+  .maincontainer {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .thecard {
+    width: 120px;
+    height: 180px;
+  }
+  
+  .opened-cards {
+    margin-top: 450px;
+  }
+  
+  .opened-card {
+    width: 180px;
+    height: 280px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .dropdown {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+  }
+  
+  .dropbtn {
+    width: 150px; /* Ukuran lebih kecil untuk tablet */
+  }
+  
+  body {
+    background-position: center;
+  }
+  
+  .maincontainer {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .thecard {
+    width: 100px;
+    height: 150px;
+  }
+  
+  .opened-cards {
+    margin-top: 350px;
+    gap: 10px;
+  }
+  
+  .opened-card {
+    width: 140px;
+    height: 220px;
+  }
+  
+  #cardInfo {
+    max-width: 90%;
+    padding: 15px;
+  }
+  
+  #cardInfo h3 {
+    font-size: 20px;
+  }
+  
+  #cardInfo p {
+    font-size: 14px;
+  }
+  
+  .button {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+  
+  #instructions {
+    font-size: 18px;
+    padding-top: 100px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .dropdown {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+  }
+  
+  .dropbtn {
+    width: 120px; /* Ukuran lebih kecil untuk mobile */
+  }
+  
+  .dropdown-content {
+    min-width: 120px;
+    font-size: 14px;
+  }
+  
+  .dropdown-content a {
+    padding: 8px 12px;
+  }
+  
+  .maincontainer {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .thecard {
+    width: 80px;
+    height: 120px;
+    margin: 5px;
+  }
+  
+  .opened-cards {
+    margin-top: 250px;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .opened-card {
+    width: 160px;
+    height: 240px;
+    margin-bottom: 10px;
+  }
+  
+  #cardInfo {
+    padding: 10px;
+  }
+  
+  #cardInfo h3 {
+    font-size: 18px;
+  }
+  
+  #cardInfo p {
+    font-size: 12px;
+  }
+  
+  .button {
+    padding: 10px 25px;
+    font-size: 14px;
+  }
+  
+  #instructions {
+    font-size: 16px;
+    padding-top: 80px;
+  }
+  
+  #muteIcon {
+    top: 250px;
+    left: 50px;
+    width: 30px;
+  }
+}
+
+/* Perbaikan untuk video background */
+@media screen and (max-width: 1024px) {
+  #background-video {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Video latar belakang -->
+  <video id="background-video" autoplay loop muted>
+    <source src="Galaxy2.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <div style="margin-top:0.5em;" class="slideshow-container">
+    <div class="slide fade">
+      <div class="text">Welcome to be a part of Tarot CIT...</div>
+    </div>
+    <div class="slide fade">
+      <div class="text">We hope you enjoy this game.</div>
+    </div>
+  </div>
+  
+  <img id="muteIcon" src="Speaker-on.png" onclick="toggleMute()" class="mute-button" style="position: relative; top: 350px; left: 100px;">
+
+  <audio id="backgroundMusic" autoplay loop>
+    <source src="Poker.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <div class="dropdown">
+    <img src="BigNavbarTitle.png" alt="Dropdown" class="dropbtn" onclick="showDropdown()">
+    <div class="dropdown-content" id="myDropdown" onmouseover="cancelHide()" onmouseout="hideDropdown()">
+      <br><br>
+      <a href="#">About me</a>
+      <a href="tarot.html">Restart</a>
+      <a href="/Home.html">Quit</a>
+    </div>
+  </div>
+  
+  
+  <script src="script.js"></script>
+  <div class="maincontainer" id="cardContainer">
+    <!-- Tarot Cards will be added here dynamically -->
+  </div>
+
+  <div class="opened-cards" id="openedCards" style="margin-top: 650px; padding-top: 0px;">
+    <!-- Opened cards will be displayed here -->
+  </div>
+
+  <!-- Section untuk menampilkan informasi tambahan mengenai kartu yang dibalik -->
+  <div id="cardInfo" style="margin-top:20px;">
+    <h3>Informasi Kartu</h3>
+    <p id="cardName">Nama Kartu:</p>
+    <p id="cardDescription">Deskripsi Singkat:</p>
+  </div>
+
+  <!-- Tombol shuffle dan instruksi tetap dipertahankan -->
+
+
+  <div id="instructions" style="text-align: center; color: white;  font-family: 'Bungee Spice', sans-serif; /* Ganti dengan font menarik Anda */
+  font-size: 24px;
+  transform: translate(-50%, -50%);
+  color: white;
+  margin-left: 50%;
+  padding-top: 140px;">
+    <p>Silakan tekan tombol Shuffle untuk mengulangi permainan setelah membuka 3 kartu.</p>
+  </div>
+
+
+  <div class="button-custom">
+    <button class="button" style="margin-bottom: 10em; margin-top: -50em;" onclick="shuffleCards()">Shuffle</button>
+    <audio id="shuffleSound" src="shuffle.mp3"></audio>
+  </div>
+  
+
+  
+
+  <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Dapatkan elemen audio
+  const welcomeAudio = document.getElementById("welcomeAudio");
+
+  // Putar audio selamat datang saat halaman dimuat
+  welcomeAudio.play();
+});
+
+let hoverTimeout; // Variabel untuk menyimpan timeout dari efek hover
+    let initialCardPositions = []; // Variabel untuk menyimpan posisi awal kartu
+    let openCount = 0; // Variabel untuk menghitung jumlah kartu yang sudah dibuka
+    let openedCards = []; // Variabel untuk menyimpan kartu yang sudah dibuka
+
+    const cardDescriptions = {
+  "Ace of Cups.png": "Ace of Cups melambangkan cinta, kegembiraan, dan keberlimpahan emosional. Ini adalah tanda baik untuk kebahagiaan, kepuasan batin, dan hubungan yang penuh kasih.",
+  "Two of Cups.png": "Two of Cups melambangkan hubungan yang harmonis, persahabatan yang kuat, atau kemitraan yang erat. Ini menunjukkan ikatan emosional yang mendalam dan saling pengertian antara dua individu.",
+  "Three of Cups.png": "Three of Cups adalah kartu yang melambangkan kegembiraan, keceriaan, dan perayaan. Ini menandakan momen sukacita, kebersamaan, dan hubungan sosial yang positif.",
+  "Four of Cups.png": "Four of Cups adalah kartu yang melambangkan kelelahan emosional, kejenuhan, atau ketidakpuasan. Ini bisa menandakan perasaan yang tidak puas terhadap apa yang sudah dimiliki atau kebutuhan untuk merenungkan kembali prioritas hidup.",
+  "Five of Cups.png": "Five of Cups melambangkan kehilangan, kesedihan, dan kekecewaan. Ini menunjukkan fokus pada kegagalan atau kerugian, meskipun ada hal positif yang masih ada di sekitar.",
+  "Six of Cups.png": "Six of Cups adalah kartu yang melambangkan nostalgia, kenangan manis, dan kemurnian. Ini menandakan waktu di masa lalu yang dipandang dengan kerinduan atau penghargaan yang dalam.",
+  "Seven of Cups.png": "Seven of Cups adalah kartu yang melambangkan fantasai, imajinasi, dan pilihan yang banyak. Ini menandakan perlu waspada terhadap ilusi atau kebingungan atas banyaknya opsi yang tersedia.",
+  "Eight of Cups.png": "Eight of Cups melambangkan perjalanan emosional, penemuan diri, dan meninggalkan masa lalu. Ini menandakan kebutuhan untuk mencari makna yang lebih dalam dalam hidup dan meninggalkan hal-hal yang tidak lagi memenuhi kebutuhan batin.",
+  "Nine of Cups.png": "Nine of Cups adalah kartu yang melambangkan kepuasan, keberlimpahan, dan kebahagiaan. Ini menandakan pencapaian tujuan atau keinginan yang diinginkan, memberikan perasaan yang sangat memuaskan.",
+  "Ten of Cups.png": "Ten of Cups melambangkan kebahagiaan keluarga, harmoni, dan keberuntungan dalam hubungan. Ini adalah tanda positif untuk kehidupan keluarga yang bahagia dan saling mendukung.",
+  "Page of Cups.png": "Page of Cups adalah simbol kreativitas, intuisi, dan perasaan yang mendalam. Kartu ini sering muncul untuk menandakan awal dari hubungan atau perjalanan emosional yang baru.",
+  "Knight of Cups.png": "Knight of Cups adalah pemberi inspirasi, romantis, dan pemimpi. Kartu ini mencerminkan seseorang yang idealis dan sering kali terdorong oleh imajinasinya sendiri.",
+  "Queen of Cups.png": "Queen of Cups melambangkan empati, kepekaan, dan intuisi yang dalam. Ini menandakan keberadaan figur maternal yang penuh kasih dan penuh perhatian.",
+  "King of Cups.png": "King of Cups adalah simbol dari kontrol emosi yang kuat, kebijaksanaan, dan kepemimpinan yang berbasis pada perasaan. Ini menunjukkan kebijaksanaan dan keseimbangan emosional dalam menghadapi situasi yang sulit.",
+  "Ace of Pentacles.png": "Ace of Pentacles adalah kartu yang melambangkan kesempatan material, keberhasilan finansial, atau pertumbuhan materi. Ini menandakan awal yang menguntungkan dalam hal kekayaan dan kestabilan.",
+  "Two of Pentacles.png": "Two of Pentacles melambangkan keseimbangan, fleksibilitas, dan perubahan. Ini menandakan kemampuan untuk menangani situasi yang kompleks atau berbagai tanggung jawab dengan kecakapan.",
+  "Three of Pentacles.png": "Three of Pentacles adalah kartu yang melambangkan kerja keras, kolaborasi, dan prestasi. Ini menandakan pengakuan atas keahlian atau kerja keras seseorang dalam mencapai tujuan bersama.",
+  "Four of Pentacles.png": "Four of Pentacles adalah kartu yang melambangkan keamanan material dan ketakutan akan kehilangan. Ini menandakan sikap kedekatan dan ketidakinginan untuk berbagi atau memberi.",
+  "Five of Pentacles.png": "Five of Pentacles melambangkan kesulitan finansial, kekurangan, atau kebutuhan. Ini menandakan masa sulit atau kebutuhan untuk mencari dukungan dalam situasi yang sulit.",
+  "Six of Pentacles.png": "Six of Pentacles adalah kartu yang melambangkan kedermawanan, pemberian, dan penerimaan. Ini menandakan sikap yang adil dalam memberi dan menerima, serta berbagi keberuntungan dengan mereka yang membutuhkan.",
+  "Seven of Pentacles.png": "Seven of Pentacles melambangkan kesabaran, evaluasi, dan investasi jangka panjang. Ini menandakan waktu yang tepat untuk mengevaluasi kemajuan, merenungkan keberhasilan, dan menentukan langkah selanjutnya.",
+  "Eight of Pentacles.png": "Eight of Pentacles adalah kartu yang melambangkan dedikasi, keterampilan, dan fokus pada detail. Ini menunjukkan kerja keras dan komitmen untuk mengembangkan keahlian atau mencapai tujuan yang diinginkan.",
+  "Nine of Pentacles.png": "Nine of Pentacles melambangkan kemakmuran, kepuasan, dan keberhasilan pribadi. Ini menandakan pencapaian finansial atau kemandirian yang memberikan kebebasan dan keamanan.",
+  "Ten of Pentacles.png": "Ten of Pentacles adalah kartu yang melambangkan kekayaan, stabilitas, dan warisan. Ini menandakan kesuksesan jangka panjang, kekayaan materi, dan dukungan dari lingkungan sosial atau keluarga.",
+  "Page of Pentacles.png": "Page of Pentacles adalah simbol ambisi, kemajuan, dan kemungkinan baru. Ini menandakan awal dari perjalanan belajar atau proses pencapaian tujuan material.",
+  "Knight of Pentacles.png": "Knight of Pentacles adalah simbol kesabaran, keteraturan, dan dedikasi terhadap tanggung jawab. Kartu ini menunjukkan kemajuan yang lambat tetapi pasti menuju tujuan yang ditetapkan.",
+  "Queen of Pentacles.png": "Queen of Pentacles melambangkan kepraktisan, kemurahan hati, dan kedekatan dengan alam. Ini menandakan figur maternal yang tangguh dan bijaksana dalam mengelola keuangan dan sumber daya.",
+  "King of Pentacles.png": "King of Pentacles adalah simbol keberhasilan finansial, stabilitas, dan kepemimpinan yang tangguh. Ini menandakan kemampuan untuk mengelola aset dan sumber daya dengan bijaksana serta mencapai kesuksesan material yang besar.",
+  "Ace of Swords.png": "Ace of Swords adalah kartu yang melambangkan kejelasan pikiran, kebenaran, dan keputusan tajam. Ini menandakan kejernihan dalam berpikir, keberanian untuk menghadapi kebenaran, dan potensi untuk kemenangan intelektual.",
+  "Two of Swords.png": "Two of Swords melambangkan konflik internal, kebingungan, atau keputusan sulit. Ini menandakan perlu untuk mencari keseimbangan antara pikiran dan perasaan, serta membuat keputusan yang bijaksana.",
+  "Three of Swords.png": "Three of Swords adalah kartu yang melambangkan kesedihan, kekecewaan, atau penderitaan emosional. Ini bisa menandakan perpisahan, pengkhianatan, atau konflik yang menyakitkan.",
+  "Four of Swords.png": "Four of Swords adalah kartu yang melambangkan pemulihan, perenungan, dan istirahat yang diperlukan. Ini menandakan perlunya waktu untuk menyembuhkan diri, merenungkan kehidupan, dan mempersiapkan diri untuk tantangan mendatang.",
+  "Five of Swords.png": "Five of Swords melambangkan konflik, kekalahan, atau perselisihan yang tidak menguntungkan. Ini bisa menandakan perasaan kemenangan yang pahit atau kehilangan kehormatan dalam situasi tertentu.",
+  "Six of Swords.png": "Six of Swords adalah kartu yang melambangkan perjalanan, penyelesaian, dan meninggalkan masa lalu yang sulit. Ini menandakan perpindahan menuju situasi yang lebih baik atau perjalanan menuju kehidupan yang lebih damai.",
+  "Seven of Swords.png": "Seven of Swords melambangkan pengkhianatan, penipuan, atau rencana yang rahasia. Ini menandakan kebutuhan untuk waspada terhadap ketidakjujuran atau mengambil tindakan hati-hati dalam situasi yang rumit.",
+  "Eight of Swords.png": "Eight of Swords adalah kartu yang melambangkan perasaan terjebak, keterbatasan, atau hambatan yang dirasakan. Ini menandakan perlunya mengatasi rasa takut atau keraguan yang membatasi pertumbuhan atau kemajuan.",
+  "Nine of Swords.png": "Nine of Swords adalah kartu yang melambangkan kecemasan, kegelisahan, atau mimpi buruk. Ini menandakan konflik internal atau kekhawatiran yang berlebihan yang mengganggu ketenangan pikiran.",
+  "Ten of Swords.png": "Ten of Swords adalah kartu yang melambangkan kehancuran, kegagalan, atau akhir dari sesuatu yang sulit. Ini menandakan akhir dari masa sulit dan kemungkinan awal dari transformasi atau penyembuhan.",
+  "Page of Swords.png": "Page of Swords adalah simbol observasi tajam, keingintahuan, dan pemikiran analitis. Ini menandakan awal dari pengetahuan baru atau perubahan dalam cara berpikir seseorang.",
+  "Knight of Swords.png": "Knight of Swords adalah simbol kecepatan, keberanian, dan tindakan yang tegas. Kartu ini menandakan kebutuhan untuk bertindak cepat dan tanpa ragu dalam menghadapi tantangan atau konflik.",
+  "Queen of Swords.png": "Queen of Swords melambangkan kecerdasan tajam, kemandirian, dan keadilan yang tegas. Ini menandakan kekuatan mental dan intelektual yang kuat serta kemampuan untuk membuat keputusan yang objektif.",
+  "King of Swords.png": "King of Swords adalah simbol otoritas, kebijaksanaan, dan keputusan yang tegas. Ini menandakan pemimpin yang berpikiran jernih, adil, dan kuat dalam menghadapi situasi sulit atau kompleks.",
+  "Ace of Wands.png": "Ace of Wands adalah simbol dari energi baru, inspirasi, dan kesempatan yang muncul. Ini menandakan awal yang kuat dan dorongan kreatif yang kuat dalam hidup seseorang.",
+  "Two of Wands.png": "Two of Wands melambangkan visi, perencanaan, dan keputusan yang penting. Ini menandakan persiapan untuk perjalanan atau proyek baru yang menjanjikan hasil yang positif.",
+  "Three of Wands.png": "Three of Wands adalah kartu yang melambangkan ekspansi, pertumbuhan, dan potensi yang belum terwujud. Ini menandakan kesempatan untuk merencanakan masa depan yang cerah dan melihat hasil dari usaha yang telah dilakukan.",
+  "Four of Wands.png": "Four of Wands adalah kartu yang melambangkan kegembiraan, stabilitas, dan kesuksesan yang dirayakan. Ini menandakan pencapaian penting atau perayaan yang meriah dalam hidup seseorang.",
+  "Five of Wands.png": "Five of Wands melambangkan persaingan, konflik, atau hambatan dalam mencapai tujuan. Ini menandakan perlunya berjuang untuk mendapatkan keunggulan atau menyelesaikan ketidaksepahaman dengan orang lain.",
+  "Six of Wands.png": "Six of Wands adalah kartu yang melambangkan kemenangan, pengakuan, dan kebanggaan. Ini menandakan keberhasilan yang layak disyukuri dan pengakuan atas usaha yang telah dilakukan.",
+  "Seven of Wands.png": "Seven of Wands melambangkan perlawanan, pertahanan, atau menegaskan diri. Ini menandakan perlunya mempertahankan posisi atau keyakinan dalam menghadapi tantangan atau kritik.",
+  "Eight of Wands.png": "Eight of Wands adalah kartu yang melambangkan perjalanan yang cepat, perubahan mendadak, atau komunikasi yang intens. Ini menandakan kebutuhan untuk bertindak cepat atau beradaptasi dengan perubahan yang terjadi.",
+  "Nine of Wands.png": "Nine of Wands melambangkan ketahanan, kegigihan, dan keberanian. Ini menandakan kesediaan untuk bertahan dalam menghadapi tantangan terakhir atau menjaga posisi yang telah diperoleh dengan susah payah.",
+  "Ten of Wands.png": "Ten of Wands adalah kartu yang melambangkan beban yang berat, kewajiban yang besar, atau kelelahan yang berlebihan. Ini menandakan perasaan terbebani oleh tanggung jawab yang berlebihan atau kesulitan dalam menyelesaikan proyek.",
+  "Page of Wands.png": "Page of Wands adalah simbol inspirasi, kegembiraan, dan ambisi yang baru. Ini menandakan potensi kreatif yang belum terungkap atau dorongan untuk menjelajahi peluang baru.",
+  "Knight of Wands.png": "Knight of Wands adalah simbol aksi, petualangan, dan semangat petualangan. Kartu ini menandakan keberanian, semangat, dan dorongan untuk mencapai tujuan dengan energi yang tinggi.",
+  "Queen of Wands.png": "Queen of Wands melambangkan keberanian, keberanian, dan kegembiraan. Ini menandakan kepemimpinan yang dinamis dan kreatif, serta kemampuan untuk menginspirasi orang lain dengan semangat dan visi.",
+  "King of Wands.png": "King of Wands adalah simbol otoritas, ambisi, dan keberanian yang tegas. Ini menandakan pemimpin yang karismatik, berenergi, dan berpandangan jauh dalam mengejar tujuan atau memimpin orang lain menuju pencapaian yang lebih tinggi.",
+  "Death.png":"Kematian Alami Dari Awal",
+  "Justice.png":"Sabda dan Kesadaran",
+  "Judgement.png":"Pengadilan",
+  "Strength.png":"Kekuatan Kepemimpinan",
+  "Temperance.png":"Keseimbangan",
+  "The Chariot.png":"Perjalanan Spiritual",
+  "The Devil.png":"Dorongan bawah sadar dan kemewahan",
+  "The Emperor.png":"Keteguhan",
+  "The Empress.png":"Kemakmuran Kreatif",
+  "The Fool.png":"Awal Baru",
+  "The Hanged Man.png":"Perspektif baru",
+  "The Hermit.png":"Kesendirian",
+  "The Hierophant.png":"Tradisi dan Spiritualitas",
+  "The High Priestess.png":"Intuisi",
+  "The Lovers.png":"Cinta dan Kebahagiaan",
+  "The Magician.png":"Kemampuan Kreatif",
+  "The Moon.png":"Ketidakpastian",
+  "The Star.png":"Harapan dan Iluminasi",
+  "The Sun.png":"Kesuksesan dan Kebahagiaan",
+  "The Tower.png":"Perubahan Mendadak",
+  "The Wheel of Fortune.png":"Perubahan Alam",
+  "The World.png":"Keterhubungan Kosmik",
+  "Joker.png":"Joker"
+
+};
+
+// Menampilkan deskripsi kartu
+for (const [card, description] of Object.entries(cardDescriptions)) {
+  console.log(`${card}: ${description}`);
+}
+
+
+
+function displayCardDescription(cardName) {
+      const descriptionContainer = document.getElementById('cardDescription');
+      descriptionContainer.innerText = cardDescriptions[cardName] || "Deskripsi tidak tersedia";
+    }
+
+    function flipCard(card) {
+  let flipSound; // Variabel untuk menyimpan file suara
+
+  // Memeriksa apakah sudah dibuka lebih dari 3 kartu
+  if (openCount > 2) {
+    flipSound = new Audio('gagal.mp3'); // File suara untuk efek gagal
+  } else {
+    flipSound = new Audio('Flip.mp3'); // File suara untuk efek flip
+  }
+
+  // Memainkan suara flip
+  flipSound.play();
+
+  // Menentukan kartu yang dibalik
+  const cardName = card.querySelector('.front img').src;
+
+  // Memeriksa apakah kartu yang dibalik adalah salah satu dari lima kartu yang diinginkan
+  const targetCards = [
+    "The Star.png",
+    "Joker.png",
+    "The Fool.png",
+    "Death.png",
+    "The World.png",
+    "The Devil.png",
+    "Judgement.png",
+    "The Sun.png"
+  ];
+
+// Objek atau daftar yang memetakan nama file kartu ke file audio yang sesuai
+const cardAudioMap = {
+  "The Star.png": "The Star.mp3",
+  "Joker.png": "Joker.mp3",
+  "The Fool.png": "The Fool.mp3",
+  "Death.png": "Death.mp3",
+  "The World.png": "The World.mp3",
+  "The Devil.png":"The Devil.mp3",
+  "Judgement.png": "Judgment.mp3",
+  "The Sun.png":"The Sun.mp3"
+};
+
+if (targetCards.includes(normalizeFileName(cardName))) {
+  // Memeriksa apakah kartu yang dibuka ada di dalam objek map
+  if (cardAudioMap.hasOwnProperty(normalizeFileName(cardName))) {
+    // Mendapatkan nama file audio yang sesuai
+    const audioFileName = cardAudioMap[normalizeFileName(cardName)];
+    // Memainkan audio yang sesuai
+    const audio = new Audio(audioFileName);
+    audio.play();
+  }
+}
+
+
+  // Animasi flip kartu
+  const cardElement = card.querySelector('.card');
+
+  // Cek apakah kartu sudah dibuka atau tidak
+  if (!cardElement.classList.contains('flipped')) {
+    // Jika kartu belum dibuka, tambahkan 1 pada hitungan kartu yang sudah dibuka
+    openCount++;
+  }
+
+  // Cek apakah sudah dibuka 3 kartu atau belum
+  if (openCount <= 3) {
+    // Jika masih kurang dari atau sama dengan 3 kartu, izinkan untuk membalik kartu
+    cardElement.classList.toggle('flipped');
+
+    // Tambahkan kartu ke dalam array kartu yang dibuka
+    if (cardElement.classList.contains('flipped')) {
+      const openedCardName = card.querySelector('.front img').src;
+      openedCards.push(openedCardName);
+      displayOpenedCards(openedCards);
+      
+      // Tampilkan deskripsi kartu yang dibalik
+      displayCardDescription(openedCardName);
+    }
+  } else {
+    // Jika sudah membuka 3 kartu, maka tidak ada yang dapat dilakukan
+    console.log("Anda sudah membuka 3 kartu, silakan klik tombol Shuffle untuk mengacak kembali kartu.");
+  }
+}
+
+
+    function blurOtherElements(card) {
+      const elementsToBlur = document.querySelectorAll('.thecard:not(.popup)');
+      elementsToBlur.forEach(element => {
+        if (element !== card && !element.querySelector('.card').classList.contains('flipped')) {
+          element.classList.add('blurred');
+        }
+      });
+    }
+
+    function unblurOtherElements() {
+      const elementsToUnblur = document.querySelectorAll('.thecard:not(.popup)');
+      elementsToUnblur.forEach(element => {
+        element.classList.remove('blurred');
+      });
+    }
+
+    function handleMouseEnter(card) {
+      if (card.querySelector('.card').classList.contains('flipped')) {
+        card.classList.add('popup');
+        blurOtherElements(card);
+      }
+    }
+
+    function handleMouseLeave(card) {
+      card.classList.remove('popup');
+      unblurOtherElements();
+    }
+
+    function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+var shuffleAudio = document.getElementById("shuffleSound");
+
+function shuffleCards() {
+  shuffleAudio.pause(); // Hentikan pemutaran jika sedang berlangsung
+  shuffleAudio.currentTime = 0; // Set ulang waktu audio ke awal
+  shuffleAudio.play();
+
+  // Set timeout untuk menghentikan pemutaran setelah 3 detik
+  setTimeout(function() {
+    shuffleAudio.pause();
+  }, 1000);
+
+  const cardContainer = document.getElementById('cardContainer');
+  openCount = 0; // Reset jumlah kartu yang sudah dibuka ke 0
+  openedCards = []; // Kosongkan array kartu yang sudah dibuka
+
+  // Kosongkan container kartu yang sudah dibuka
+  const openedCardsContainer = document.getElementById('openedCards');
+  openedCardsContainer.innerHTML = '';
+
+  // Kosongkan informasi kartu yang sudah dibuka
+  const cardInfo = document.getElementById('cardInfo');
+  cardInfo.innerHTML = `
+    <h3>Informasi Kartu</h3>
+    <p id="cardName">Nama Kartu:</p>
+    <p id="cardDescription">Deskripsi Singkat:</p>
+  `;
+
+  // Hapus semua kartu yang ada
+  cardContainer.innerHTML = '';
+
+  // Buat ulang kartu-kartu dengan urutan yang diacak
+  const shuffledCards = shuffle(cardNames).slice(0, 15); // Ambil 15 kartu pertama dari array yang diacak
+  for (let i = 0; i < shuffledCards.length; i++) {
+    const cardElement = document.createElement('div');
+    cardElement.classList.add('thecard');
+    cardElement.onclick = function () {
+      flipCard(this);
+    };
+    cardElement.onmouseenter = function () {
+      handleMouseEnter(this);
+    };
+    cardElement.onmouseleave = function () {
+      handleMouseLeave(this);
+    };
+    cardElement.style.order = i; // Set posisi awal kartu
+    const cardInnerHtml = `
+      <div class="card" style="margin-top: 650px;">
+        <div class="face front"><img src="${shuffledCards[i]}" alt="Front of Card ${i + 1}"></div>
+        <div class="face back"><img src="Tarot Mayor Arcana/Tarot Back Card!.png" alt="Back of Card ${i + 1}"></div>
+      </div>
+    `;
+    cardElement.innerHTML = cardInnerHtml;
+    cardContainer.appendChild(cardElement);
+
+    // Tambahkan kelas animasi untuk efek shuffle
+    setTimeout(() => {
+      cardElement.classList.add('shuffle-animation');
+    }, i * 50); // Atur penundaan untuk efek shuffle
+  }
+}
+
+function resetGame() {
+  shuffleCards();
+  const openedCardsContainer = document.getElementById('openedCards');
+  openedCardsContainer.innerHTML = ''; // Kosongkan container kartu yang sudah dibuka
+}
+
+// Panggil fungsi shuffleCards() saat halaman dimuat pertama kali
+window.onload = shuffleCards;
+
+// Simpan posisi awal kartu saat pertama kali dibuat
+const cardContainer = document.getElementById('cardContainer');
+const cards = cardContainer.querySelectorAll('.thecard');
+cards.forEach((card, index) => {
+  initialCardPositions.push(parseInt(card.style.order || index));
+});
+
+    const cardNames = [
+      "Tarot Mayor Arcana/Death.png",
+      "Tarot Mayor Arcana/Joker.png",
+      "Tarot Mayor Arcana/Judgement.png",
+      "Tarot Mayor Arcana/Justice.png",
+      "Tarot Mayor Arcana/Strength.png",
+      "Tarot Mayor Arcana/Temperance.png",
+      "Tarot Mayor Arcana/The Chariot.png",
+      "Tarot Mayor Arcana/The Devil.png",
+      "Tarot Mayor Arcana/The Emperor.png",
+      "Tarot Mayor Arcana/The Empress.png",
+      "Tarot Mayor Arcana/The Fool.png",
+      "Tarot Mayor Arcana/The Hanged Man.png",
+      "Tarot Mayor Arcana/The Hermit.png",
+      "Tarot Mayor Arcana/The Hierophant.png",
+      "Tarot Mayor Arcana/The High Priestess.png",
+      "Tarot Mayor Arcana/The Lovers.png",
+      "Tarot Mayor Arcana/The Magician.png",
+      "Tarot Mayor Arcana/The Moon.png",
+      "Tarot Mayor Arcana/The Star.png",
+      "Tarot Mayor Arcana/The Sun.png",
+      "Tarot Mayor Arcana/The Tower.png",
+      "Tarot Mayor Arcana/The Wheel of Fortune.png",
+      "Tarot Mayor Arcana/The World.png",
+      "Tarot Minor Arcana/Ace of Cups.png",
+      "Tarot Minor Arcana/Eight of Cups.png",
+      "Tarot Minor Arcana/Five of Cups.png",
+      "Tarot Minor Arcana/Four of Cups.png",
+      "Tarot Minor Arcana/King of Cups.png",
+      "Tarot Minor Arcana/Knight of Cups.png",
+      "Tarot Minor Arcana/Nine of Cups.png",
+      "Tarot Minor Arcana/Page of Cups.png",
+      "Tarot Minor Arcana/Queen of Cups.png",
+      "Tarot Minor Arcana/Seven of Cups.png",
+      "Tarot Minor Arcana/Six of Cups.png",
+      "Tarot Minor Arcana/Ten of Wands.png",
+      "Tarot Minor Arcana/Three of Wands.png",
+      "Tarot Minor Arcana/Two of Wands.png",
+      "Tarot Minor Arcana/Ace of Pentacles.png",
+      "Tarot Minor Arcana/Eight of Pentacles.png",
+      "Tarot Minor Arcana/Five of Pentacles.png",
+      "Tarot Minor Arcana/Four of Pentacles.png",
+      "Tarot Minor Arcana/King of Pentacles.png",
+      "Tarot Minor Arcana/Knight of Pentacles.png",
+      "Tarot Minor Arcana/Nine of Pentacles.png",
+      "Tarot Minor Arcana/Page of Pentacles.png",
+      "Tarot Minor Arcana/Queen of Pentacles.png",
+      "Tarot Minor Arcana/Seven of Pentacles.png",
+      "Tarot Minor Arcana/Six of Pentacles.png",
+      "Tarot Minor Arcana/Ten of Cups.png",
+      "Tarot Minor Arcana/Three of Cups.png",
+      "Tarot Minor Arcana/Two of Cups.png",
+      "Tarot Minor Arcana/Ace of Swords.png",
+      "Tarot Minor Arcana/Eight of Swords.png",
+      "Tarot Minor Arcana/Five of Swords.png",
+      "Tarot Minor Arcana/Four of Swords.png",
+      "Tarot Minor Arcana/King of Swords.png",
+      "Tarot Minor Arcana/Knight of Swords.png",
+      "Tarot Minor Arcana/Nine of Swords.png",
+      "Tarot Minor Arcana/Page of Swords.png",
+      "Tarot Minor Arcana/Queen of Swords.png",
+      "Tarot Minor Arcana/Seven of Swords.png",
+      "Tarot Minor Arcana/Six of Swords.png",
+      "Tarot Minor Arcana/Ten of Pentacles.png",
+      "Tarot Minor Arcana/Three of Pentacles.png",
+      "Tarot Minor Arcana/Two of Pentacles.png",
+      "Tarot Minor Arcana/Ace of Wands.png",
+      "Tarot Minor Arcana/Eight of Wands.png",
+      "Tarot Minor Arcana/Five of Wands.png",
+      "Tarot Minor Arcana/Four of Wands.png",
+      "Tarot Minor Arcana/King of Wands.png",
+      "Tarot Minor Arcana/Knight of Wands.png",
+      "Tarot Minor Arcana/Nine of Wands.png",
+      "Tarot Minor Arcana/Page of Wands.png",
+      "Tarot Minor Arcana/Queen of Wands.png",
+      "Tarot Minor Arcana/Seven of Wands.png",
+      "Tarot Minor Arcana/Six of Wands.png",
+      "Tarot Minor Arcana/Ten of Swords.png",
+      "Tarot Minor Arcana/Three of Swords.png",
+      "Tarot Minor Arcana/Two of Swords.png"
+      
+    ];
+    function normalizeFileName(fileName) {
+  // Menghapus path dari nama file
+  
+  // Menghapus path dari nama file
+  const fileNameWithoutPath = fileName.split('/').pop();
+  // Mengonversi URI yang dikodekan kembali menjadi string yang valid
+  return decodeURIComponent(fileNameWithoutPath);
+  
+}
+
+function displayOpenedCards(cards) {
+  const openedCardsContainer = document.getElementById('openedCards');
+  openedCardsContainer.innerHTML = ''; // Kosongkan container terlebih dahulu
+  
+  cards.forEach(cardName => {
+    const openedCardElement = document.createElement('div');
+    openedCardElement.classList.add('opened-card');
+    const cardImage = document.createElement('img');
+    cardImage.src = cardName;
+    openedCardElement.appendChild(cardImage);
+    openedCardsContainer.appendChild(openedCardElement);
+  });
+
+  
+  // Menampilkan informasi tambahan mengenai kartu yang dibalik
+  const cardInfo = document.getElementById('cardInfo');
+  const lastOpenedCard = normalizeFileName(cards[cards.length - 1]); // Normalize file name
+  const cardDescription = cardDescriptions[lastOpenedCard];
+  cardInfo.innerHTML = `
+    <h3>Informasi Kartu</h3>
+    <p>Nama Kartu: ${lastOpenedCard}</p>
+    <p>Deskripsi Singkat: ${cardDescription}</p>
+  `;
+}
+
+function toggleMute() {
+  const backgroundMusic = document.getElementById("backgroundMusic");;;
+  const muteIcon = document.getElementById("muteIcon");
+
+  // Toggle mute for all audio elements
+  [backgroundMusic, shuffleSound].forEach(audio => {
+    if (audio.muted) {
+      audio.muted = false;
+      muteIcon.src = "Speaker-on.png";
+    } else {
+      audio.muted = true;
+      muteIcon.src = "Speaker-mute.png";
+    }
+  });
+}
+
+let dropdownTimeout;
+let isDropdownVisible = false;
+
+function showDropdown() {
+  clearTimeout(dropdownTimeout);
+  const dropdown = document.getElementById("myDropdown");
+  if (!isDropdownVisible) {
+    dropdown.style.display = "block";
+    isDropdownVisible = true;
+  }
+}
+
+function hideDropdown() {
+  dropdownTimeout = setTimeout(() => {
+    const dropdown = document.getElementById("myDropdown");
+    dropdown.style.display = "none";
+    isDropdownVisible = false;
+  }, 500); // Tambahkan delay 500ms sebelum menu menghilang
+}
+
+function cancelHide() {
+  clearTimeout(dropdownTimeout);
+}
+
+// Tambahkan event listener untuk klik di luar dropdown
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById("myDropdown");
+  const dropbtn = document.querySelector(".dropbtn");
+  
+  if (!event.target.matches('.dropbtn') && !dropdown.contains(event.target)) {
+    dropdown.style.display = "none";
+    isDropdownVisible = false;
+  }
+});
+
+  </script>
+</body>
+</html>
